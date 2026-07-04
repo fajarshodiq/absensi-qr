@@ -135,16 +135,27 @@
          background-color: #ffffff;
       }
 
+
       /* Totals styling */
       .total-col {
          font-weight: 700;
          font-size: 11px;
-         width: 32px;
+         width: 38px;
+         line-height: 1.2;
       }
       .total-h { background-color: rgba(22, 160, 133, 0.08) !important; color: #16a085; }
       .total-s { background-color: rgba(41, 128, 185, 0.08) !important; color: #2980b9; }
       .total-i { background-color: rgba(243, 156, 18, 0.08) !important; color: #f39c12; }
       .total-a { background-color: rgba(192, 41, 43, 0.08) !important; color: #c0392b; }
+
+      .pct-label {
+         display: block;
+         font-size: 8.5px;
+         font-weight: 500;
+         color: inherit;
+         opacity: 0.75;
+         margin-top: 1px;
+      }
 
       /* Summary Box at the bottom */
       .summary-section {
@@ -180,17 +191,56 @@
       @media print {
          @page {
             size: A4 landscape;
-            margin: 1cm 1.5cm;
+            margin: 0.4cm 0.5cm;
          }
          body {
             margin: 0;
             padding: 0;
             background-color: #ffffff;
+            font-size: 9px;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
          }
          .report-table {
             box-shadow: none;
+            font-size: 7.5px !important;
+         }
+         .report-table th, .report-table td {
+            padding: 3px 1px !important;
+         }
+         .student-name-td {
+            padding-left: 4px !important;
+            font-size: 7.5px !important;
+         }
+         .status-cell {
+            width: 14px !important;
+            font-size: 7.5px !important;
+         }
+         .total-col {
+            width: 28px !important;
+            font-size: 7.5px !important;
+         }
+         .pct-label {
+            font-size: 7px !important;
+            margin-top: 0px;
+         }
+         .report-header-table {
+            margin-bottom: 8px;
+         }
+         .summary-section {
+            margin-top: 10px;
+         }
+         .summary-card {
+            padding: 6px 10px;
+            min-width: 180px;
+         }
+         .summary-card h5 {
+            margin-bottom: 4px;
+            font-size: 10px;
+         }
+         .summary-row {
+            font-size: 9px;
+            margin-bottom: 2px;
          }
       }
    </style>

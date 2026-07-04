@@ -31,26 +31,24 @@
 <table class="report-table">
    <thead>
       <tr>
-         <th rowspan="3" width="40px">No</th>
+         <th rowspan="3" width="30px">No</th>
          <th rowspan="3" style="text-align: left; padding-left: 12px;">Nama Siswa</th>
          <th colspan="<?= count($tanggal); ?>">Hari / Tanggal</th>
-         <th colspan="4">Total Absen</th>
-         <th rowspan="3" width="100px">Persentase</th>
+         <th colspan="4" rowspan="2">Total & %</th>
       </tr>
       <tr>
          <?php foreach ($tanggal as $value): ?>
             <th style="font-size: 9px; font-weight: bold;"><?= $value->toLocalizedString('E'); ?></th>
          <?php endforeach; ?>
-         <th colspan="4" style="font-size: 9px; font-weight: bold;">Status</th>
       </tr>
       <tr>
          <?php foreach ($tanggal as $value): ?>
             <th><?= $value->format('d'); ?></th>
          <?php endforeach; ?>
-         <th class="total-h" style="width: 25px;">H</th>
-         <th class="total-s" style="width: 25px;">S</th>
-         <th class="total-i" style="width: 25px;">I</th>
-         <th class="total-a" style="width: 25px;">A</th>
+         <th class="total-h" style="width: 35px;">H</th>
+         <th class="total-s" style="width: 35px;">S</th>
+         <th class="total-i" style="width: 35px;">I</th>
+         <th class="total-a" style="width: 35px;">A</th>
       </tr>
    </thead>
    <tbody>
@@ -108,15 +106,21 @@
             <?php foreach ($listAbsen as $absen): ?>
                <?= kehadiranCell($absen[$i]['id_kehadiran'] ?? ($absen['lewat'] ? 5 : 4)); ?>
             <?php endforeach; ?>
-            <td class="total-col total-h"><?= $jumlahHadir != 0 ? $jumlahHadir : '-'; ?></td>
-            <td class="total-col total-s"><?= $jumlahSakit != 0 ? $jumlahSakit : '-'; ?></td>
-            <td class="total-col total-i"><?= $jumlahIzin != 0 ? $jumlahIzin : '-'; ?></td>
-            <td class="total-col total-a"><?= $jumlahTidakHadir != 0 ? $jumlahTidakHadir : '-'; ?></td>
-            <td style="text-align: left; font-size: 10px; line-height: 1.3; font-weight: bold; white-space: nowrap;">
-               <span style="color: var(--color-hadir);">H: <?= $persenHadir ?>%</span><br>
-               <span style="color: var(--color-sakit);">S: <?= $persenSakit ?>%</span><br>
-               <span style="color: var(--color-izin);">I: <?= $persenIzin ?>%</span><br>
-               <span style="color: var(--color-alpa);">A: <?= $persenAlpa ?>%</span>
+            <td class="total-col total-h">
+               <?= $jumlahHadir != 0 ? $jumlahHadir : '-'; ?><br>
+               <span class="pct-label"><?= $persenHadir ?>%</span>
+            </td>
+            <td class="total-col total-s">
+               <?= $jumlahSakit != 0 ? $jumlahSakit : '-'; ?><br>
+               <span class="pct-label"><?= $persenSakit ?>%</span>
+            </td>
+            <td class="total-col total-i">
+               <?= $jumlahIzin != 0 ? $jumlahIzin : '-'; ?><br>
+               <span class="pct-label"><?= $persenIzin ?>%</span>
+            </td>
+            <td class="total-col total-a">
+               <?= $jumlahTidakHadir != 0 ? $jumlahTidakHadir : '-'; ?><br>
+               <span class="pct-label"><?= $persenAlpa ?>%</span>
             </td>
          </tr>
       <?php
