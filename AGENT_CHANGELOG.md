@@ -55,7 +55,7 @@ File ini mencatat riwayat perubahan, logika kode baru, serta alur pengerjaan fit
   * Menambahkan style badge status absensi warna pastel lembut: `.status-h` (Hijau), `.status-s` (Biru), `.status-i` (Oranye), `.status-a` (Merah).
   * Menambahkan CSS Media Print `@page { size: A4 landscape; }` agar print dialog browser otomatis tersetting Landscape.
   * Menambahkan `-webkit-print-color-adjust: exact` agar warna latar badge status tercetak di PDF.
-  * Menambahkan optimasi CSS print khusus (margin 0.4cm, padding cell 3px 1px, font-size 7.5px) agar tabel bulanan (31 hari) dan semester pas dalam satu halaman cetak (A4 Landscape) tanpa overflow horizontal maupun vertikal.
+  * Menambahkan optimasi CSS print khusus (margin 0.3cm, padding cell 3px 1px, font-size 7.5px, pembatasan lebar nama siswa/guru max 140px, serta **Dynamic Print Zoom** berdasarkan durasi/jumlah kolom hari: Mingguan zoom 1.0, Bulanan zoom 0.72, dan Semester zoom 0.40) agar laporan tidak overflow secara horizontal maupun vertikal dan muat pas dalam satu lembar halaman.
 
 #### 6. laporan-siswa.php (Template Laporan Siswa)
 * **Logika Baru:**
