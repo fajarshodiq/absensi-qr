@@ -55,13 +55,14 @@ File ini mencatat riwayat perubahan, logika kode baru, serta alur pengerjaan fit
   * Menambahkan style badge status absensi warna pastel lembut: `.status-h` (Hijau), `.status-s` (Biru), `.status-i` (Oranye), `.status-a` (Merah).
   * Menambahkan CSS Media Print `@page { size: A4 landscape; }` agar print dialog browser otomatis tersetting Landscape.
   * Menambahkan `-webkit-print-color-adjust: exact` agar warna latar badge status tercetak di PDF.
+  * Menambahkan optimasi CSS print khusus (margin 0.4cm, padding cell 3px 1px, font-size 7.5px) agar tabel bulanan (31 hari) dan semester pas dalam satu halaman cetak (A4 Landscape) tanpa overflow horizontal maupun vertikal.
 
 #### 6. laporan-siswa.php (Template Laporan Siswa)
 * **Logika Baru:**
   * Menggabungkan kolom header (Rowspan/Colspan) menjadi rapi dan sejajar.
   * Menghitung total hari aktif (`$activeDays`) untuk mengabaikan hari di masa depan.
-  * Menghitung persentase kehadiran per siswa (Hadir, Sakit, Izin, Alpa) dan menampilkannya di kolom baru "Persentase".
+  * Menghilangkan kolom "Persentase" yang memakan ruang lebar secara mandiri, lalu menyatukan nilai persentase kehadiran masing-masing siswa ke dalam kolom status **H, S, I, A** secara bertumpuk vertikal (contoh: angka rekap `20` lalu di bawahnya persen `95%` menggunakan font kecil). Ini sangat menghemat ruang cetak horizontal.
   * Menghitung rata-rata kehadiran seluruh kelas dan menampilkannya di box ringkasan (Summary Card) di bagian bawah.
 
 #### 7. laporan-guru.php (Template Laporan Guru)
-* **Logika Baru:** Menerapkan desain, kolom persentase individu, ringkasan rata-rata kehadiran guru, dan formatting yang sama persis dengan laporan siswa.
+* **Logika Baru:** Menerapkan desain, penggabungan persentase ke kolom H, S, I, A, ringkasan rata-rata kehadiran guru, dan formatting yang sama persis dengan laporan siswa.
