@@ -27,12 +27,22 @@
    </tr>
 </table>
 
+<?php
+$numDays = count($tanggal);
+$rangeClass = 'range-weekly';
+if ($numDays > 35) {
+   $rangeClass = 'range-semester';
+} else if ($numDays > 10) {
+   $rangeClass = 'range-monthly';
+}
+?>
+
 <!-- Main Attendance Table -->
-<table class="report-table">
+<table class="report-table <?= $rangeClass ?>">
    <thead>
       <tr>
          <th rowspan="3" width="30px">No</th>
-         <th rowspan="3" style="text-align: left; padding-left: 12px;">Nama Guru</th>
+         <th rowspan="3" class="student-name-header">Nama Guru</th>
          <th colspan="<?= count($tanggal); ?>">Hari / Tanggal</th>
          <th colspan="4" rowspan="2">Total & %</th>
       </tr>

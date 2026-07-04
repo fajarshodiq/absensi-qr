@@ -157,6 +157,22 @@
          margin-top: 1px;
       }
 
+      /* Name Column Constraining */
+      .student-name-header, .student-name-td {
+         text-align: left !important;
+         padding-left: 8px !important;
+         width: 140px;
+         max-width: 140px;
+         overflow: hidden;
+         text-overflow: ellipsis;
+         white-space: nowrap;
+      }
+
+      /* Dynamic Zoom Classes based on report duration */
+      .range-weekly { zoom: 1; }
+      .range-monthly { zoom: 0.85; }
+      .range-semester { zoom: 0.55; }
+
       /* Summary Box at the bottom */
       .summary-section {
          margin-top: 30px;
@@ -191,7 +207,7 @@
       @media print {
          @page {
             size: A4 landscape;
-            margin: 0.4cm 0.5cm;
+            margin: 0.3cm 0.4cm;
          }
          body {
             margin: 0;
@@ -208,8 +224,10 @@
          .report-table th, .report-table td {
             padding: 3px 1px !important;
          }
-         .student-name-td {
+         .student-name-header, .student-name-td {
             padding-left: 4px !important;
+            width: 110px !important;
+            max-width: 110px !important;
             font-size: 7.5px !important;
          }
          .status-cell {
@@ -217,31 +235,36 @@
             font-size: 7.5px !important;
          }
          .total-col {
-            width: 28px !important;
+            width: 26px !important;
             font-size: 7.5px !important;
          }
          .pct-label {
-            font-size: 7px !important;
+            font-size: 6.5px !important;
             margin-top: 0px;
          }
          .report-header-table {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
          }
          .summary-section {
-            margin-top: 10px;
+            margin-top: 8px;
          }
          .summary-card {
-            padding: 6px 10px;
-            min-width: 180px;
+            padding: 5px 8px;
+            min-width: 160px;
          }
          .summary-card h5 {
-            margin-bottom: 4px;
-            font-size: 10px;
+            margin-bottom: 3px;
+            font-size: 9px;
          }
          .summary-row {
-            font-size: 9px;
-            margin-bottom: 2px;
+            font-size: 8px;
+            margin-bottom: 1px;
          }
+         
+         /* Print zoom adjustments */
+         .range-weekly { zoom: 1 !important; }
+         .range-monthly { zoom: 0.72 !important; }
+         .range-semester { zoom: 0.40 !important; }
       }
    </style>
 </head>
