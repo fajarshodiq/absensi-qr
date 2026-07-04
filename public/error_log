@@ -1,0 +1,35 @@
+[24-May-2026 09:53:21 Asia/Jakarta] PHP Fatal error:  Uncaught RuntimeException: Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.2.0". You are running 8.1.34. in /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/composer/platform_check.php:22
+Stack trace:
+#0 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/composer/autoload_real.php(25): require()
+#1 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/autoload.php(22): ComposerAutoloaderInitfc6b221b17a76a91844f0081ad0c1305::getLoader()
+#2 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Autoloader/Autoloader.php(146): include('/home/desm8295/...')
+#3 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Autoloader/Autoloader.php(131): CodeIgniter\Autoloader\Autoloader->loadComposerAutoloader()
+#4 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Boot.php(282): CodeIgniter\Autoloader\Autoloader->initialize()
+#5 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Boot.php(55): CodeIgniter\Boot::loadAutoloader()
+#6 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/public/index.php(56): CodeIgniter\Boot::bootWeb()
+#7 {main}
+  thrown in /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/composer/platform_check.php on line 22
+[24-May-2026 09:55:08 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function CodeIgniter\Autoloader\mb_strpos() in /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Autoloader/FileLocator.php:287
+Stack trace:
+#0 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Config/BaseService.php(417): CodeIgniter\Autoloader\FileLocator->findQualifiedNameFromPath()
+#1 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Config/BaseService.php(330): CodeIgniter\Config\BaseService::buildServicesCache()
+#2 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Config/BaseService.php(315): CodeIgniter\Config\BaseService::serviceExists()
+#3 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Config/BaseService.php(202): CodeIgniter\Config\BaseService::__callStatic()
+#4 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Common.php(1027): CodeIgniter\Config\BaseService::get()
+#5 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Boot.php(292): service()
+#6 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Boot.php(56): CodeIgniter\Boot::setExceptionHandler()
+#7 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/public/index.php(56): CodeIgniter\Boot::bootWeb()
+#8 {main}
+  thrown in /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Autoloader/FileLocator.php on line 287
+[24-May-2026 09:55:12 Asia/Jakarta] PHP Fatal error:  Uncaught Error: Call to undefined function CodeIgniter\Autoloader\mb_strpos() in /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Autoloader/FileLocator.php:287
+Stack trace:
+#0 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Config/BaseService.php(417): CodeIgniter\Autoloader\FileLocator->findQualifiedNameFromPath()
+#1 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Config/BaseService.php(330): CodeIgniter\Config\BaseService::buildServicesCache()
+#2 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Config/BaseService.php(315): CodeIgniter\Config\BaseService::serviceExists()
+#3 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Config/BaseService.php(202): CodeIgniter\Config\BaseService::__callStatic()
+#4 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Common.php(1027): CodeIgniter\Config\BaseService::get()
+#5 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Boot.php(292): service()
+#6 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Boot.php(56): CodeIgniter\Boot::setExceptionHandler()
+#7 /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/public/index.php(56): CodeIgniter\Boot::bootWeb()
+#8 {main}
+  thrown in /home/desm8295/public_html/ma-darulmaarifnatar.mawedding.my.id/vendor/codeigniter4/framework/system/Autoloader/FileLocator.php on line 287

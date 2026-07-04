@@ -1,0 +1,20 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # 1. Jika request sudah menuju folder public/, jangan di-rewrite lagi
+    RewriteCond %{REQUEST_URI} !^/public/
+    
+    # 2. Redirect semua request lainnya ke folder public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Block akses langsung ke file sensitif
+RedirectMatch 403 \.(env|gitattributes|gitignore|json|lock|dist|php)$
+RedirectMatch 403 ^/(app|writable|tests|vendor)/
+
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the “alt-php82” package as the default “PHP” programming language.
+<IfModule mime_module>
+  AddHandler application/x-httpd-alt-php82___lsphp .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit
