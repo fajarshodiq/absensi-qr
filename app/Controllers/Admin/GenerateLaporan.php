@@ -73,27 +73,113 @@ class GenerateLaporan extends BaseController
 
       $kelas = (array) $this->kelasModel->getKelas($idKelas);
 
-      $bulan = $this->request->getVar('tanggalSiswa');
+      // Determine date range based on filter type
+      $filterType = $this->request->getVar('filter_type') ?? 'bulanan';
+      $startDate = null;
+      $endDate = null;
+      $labelPeriode = '';
 
-      // hari pertama dalam 1 bulan
-      $begin = new Time($bulan, locale: 'id');
-      // tanggal terakhir dalam 1 bulan
-      $end = (new DateTime($begin->format('Y-m-t')))->modify('+1 day');
-      // interval 1 hari
+      if ($filterType == 'mingguan') {
+         $startDate = $this->request->getVar('start_date') ?? date('Y-m-d');
+         $endDate = $this->request->getVar('end_date') ?? date('Y-m-d');
+         
+         $startTI = new Time($startDate, locale: 'id');
+         $endTI = new Time($endDate, locale: 'id');
+         $labelPeriode = "Rentang: " . $startTI->toLocalizedString('d MMMM Y') . " s/d " . $endTI->toLocalizedString('d MMMM Y');
+      } else if ($filterType == 'semester') {
+         $semester = $this->request->getVar('semester') ?? 'ganjil';
+         $tahunAjaran = $this->request->getVar('tahun_ajaran') ?? date('Y') . '/' . (date('Y') + 1);
+         $years = explode('/', $tahunAjaran);
+         
+         if (count($years) == 2) {
+            if ($semester == 'ganjil') {
+               $startDate = $years[0] . "-07-01";
+               $endDate = $years[0] . "-12-31";
+               $labelPeriode = "Semester Ganjil TA " . $tahunAjaran;
+            } else {
+               $startDate = $years[1] . "-01-01";
+               $endDate = $years[1] . "-06-30";
+               $labelPeriode = "Semester Genap TA " . $tahunAjaran;
+            }
+         } else {
+            $startDate = date('Y-m-01');
+            $endDate = date('Y-m-t');
+            $labelPeriode = "Bulanan: " . (new Time($startDate, locale: 'id'))->toLocalizedString('MMMM Y');
+         }
+      } else {
+         // bulanan
+         $bulanInput = $this->request->getVar('bulanSiswa');
+         $tahunInput = $this->request->getVar('tahunSiswa');
+         if ($bulanInput && $tahunInput) {
+            $bulan = $tahunInput . '-' . sprintf("%02d", $bulanInput);
+         } else {
+            $bulan = $this->request->getVar('tanggalSiswa') ?? date('Y-m');
+         }
+         
+         $begin = new Time($bulan, locale: 'id');
+         $startDate = $begin->format('Y-m-01');
+         $endDate = $begin->format('Y-m-t');
+         $labelPeriode = "Bulan: " . $begin->toLocalizedString('MMMM Y');
+      }
+
+      $begin = new Time($startDate, locale: 'id');
+      $end = (new DateTime($endDate))->modify('+1 day');
       $interval = DateInterval::createFromDateString('1 day');
-      // buat array dari semua hari di bulan
       $period = new DatePeriod($begin, $interval, $end);
+
+      // Fetch all attendance for this class in the date range (OPTIMIZED SINGLE QUERY)
+      $allPresensi = $this->presensiSiswaModel->db->table('tb_presensi_siswa')
+         ->select('tb_presensi_siswa.*, tb_kehadiran.kehadiran')
+         ->join('tb_kehadiran', 'tb_presensi_siswa.id_kehadiran = tb_kehadiran.id_kehadiran', 'left')
+         ->where('tb_presensi_siswa.id_kelas', $idKelas)
+         ->where('tb_presensi_siswa.tanggal >=', $startDate)
+         ->where('tb_presensi_siswa.tanggal <=', $endDate)
+         ->get()
+         ->getResultArray();
+
+      // Index attendance by student ID and date
+      $presensiIndexed = [];
+      foreach ($allPresensi as $p) {
+         $presensiIndexed[$p['id_siswa']][$p['tanggal']] = $p;
+      }
 
       $arrayTanggal = [];
       $dataAbsen = [];
 
       foreach ($period as $value) {
+         $dateStr = $value->format('Y-m-d');
          // kecualikan hari sabtu dan minggu
          if (!($value->format('D') == 'Sat' || $value->format('D') == 'Sun')) {
-            $lewat = Time::parse($value->format('Y-m-d'))->isAfter(Time::today());
+            $lewat = Time::parse($dateStr)->isAfter(Time::today());
 
-            $absenByTanggal = $this->presensiSiswaModel
-               ->getPresensiByKelasTanggal($idKelas, $value->format('Y-m-d'));
+            $absenByTanggal = [];
+            foreach ($siswa as $s) {
+               $idSiswa = $s['id_siswa'];
+               if (isset($presensiIndexed[$idSiswa][$dateStr])) {
+                  $p = $presensiIndexed[$idSiswa][$dateStr];
+                  $absenByTanggal[] = [
+                     'id_presensi' => $p['id_presensi'],
+                     'id_siswa' => $p['id_siswa'],
+                     'tanggal' => $p['tanggal'],
+                     'jam_masuk' => $p['jam_masuk'],
+                     'jam_keluar' => $p['jam_keluar'],
+                     'id_kehadiran' => $p['id_kehadiran'],
+                     'keterangan' => $p['keterangan'],
+                     'kehadiran' => $p['kehadiran']
+                  ];
+               } else {
+                  $absenByTanggal[] = [
+                     'id_presensi' => null,
+                     'id_siswa' => $idSiswa,
+                     'tanggal' => $dateStr,
+                     'jam_masuk' => null,
+                     'jam_keluar' => null,
+                     'id_kehadiran' => null,
+                     'keterangan' => '',
+                     'kehadiran' => null
+                  ];
+               }
+            }
 
             $absenByTanggal['lewat'] = $lewat;
 
@@ -103,7 +189,6 @@ class GenerateLaporan extends BaseController
       }
 
       $laki = 0;
-
       foreach ($siswa as $value) {
          if ($value['jenis_kelamin'] != 'Perempuan') {
             $laki++;
@@ -112,7 +197,7 @@ class GenerateLaporan extends BaseController
 
       $data = [
          'tanggal' => $arrayTanggal,
-         'bulan' => $begin->toLocalizedString('MMMM'),
+         'bulan' => $labelPeriode,
          'listAbsen' => $dataAbsen,
          'listSiswa' => $siswa,
          'rekapSiswa' => [
@@ -127,7 +212,7 @@ class GenerateLaporan extends BaseController
          $this->response->setHeader('Content-type', 'application/vnd.ms-word');
          $this->response->setHeader(
             'Content-Disposition',
-            'attachment;Filename=laporan_absen_' . $kelas['kelas'] . '_' . $begin->toLocalizedString('MMMM-Y') . '.doc'
+            'attachment;Filename=laporan_absen_' . $kelas['kelas'] . '_' . str_replace(' ', '_', $labelPeriode) . '.doc'
          );
 
          return view('admin/generate-laporan/laporan-siswa', $data);
@@ -149,27 +234,112 @@ class GenerateLaporan extends BaseController
          return redirect()->to('/admin/laporan');
       }
 
-      $bulan = $this->request->getVar('tanggalGuru');
+      // Determine date range based on filter type
+      $filterType = $this->request->getVar('filter_type') ?? 'bulanan';
+      $startDate = null;
+      $endDate = null;
+      $labelPeriode = '';
 
-      // hari pertama dalam 1 bulan
-      $begin = new Time($bulan, locale: 'id');
-      // tanggal terakhir dalam 1 bulan
-      $end = (new DateTime($begin->format('Y-m-t')))->modify('+1 day');
-      // interval 1 hari
+      if ($filterType == 'mingguan') {
+         $startDate = $this->request->getVar('start_date') ?? date('Y-m-d');
+         $endDate = $this->request->getVar('end_date') ?? date('Y-m-d');
+         
+         $startTI = new Time($startDate, locale: 'id');
+         $endTI = new Time($endDate, locale: 'id');
+         $labelPeriode = "Rentang: " . $startTI->toLocalizedString('d MMMM Y') . " s/d " . $endTI->toLocalizedString('d MMMM Y');
+      } else if ($filterType == 'semester') {
+         $semester = $this->request->getVar('semester') ?? 'ganjil';
+         $tahunAjaran = $this->request->getVar('tahun_ajaran') ?? date('Y') . '/' . (date('Y') + 1);
+         $years = explode('/', $tahunAjaran);
+         
+         if (count($years) == 2) {
+            if ($semester == 'ganjil') {
+               $startDate = $years[0] . "-07-01";
+               $endDate = $years[0] . "-12-31";
+               $labelPeriode = "Semester Ganjil TA " . $tahunAjaran;
+            } else {
+               $startDate = $years[1] . "-01-01";
+               $endDate = $years[1] . "-06-30";
+               $labelPeriode = "Semester Genap TA " . $tahunAjaran;
+            }
+         } else {
+            $startDate = date('Y-m-01');
+            $endDate = date('Y-m-t');
+            $labelPeriode = "Bulanan: " . (new Time($startDate, locale: 'id'))->toLocalizedString('MMMM Y');
+         }
+      } else {
+         // bulanan
+         $bulanInput = $this->request->getVar('bulanGuru');
+         $tahunInput = $this->request->getVar('tahunGuru');
+         if ($bulanInput && $tahunInput) {
+            $bulan = $tahunInput . '-' . sprintf("%02d", $bulanInput);
+         } else {
+            $bulan = $this->request->getVar('tanggalGuru') ?? date('Y-m');
+         }
+         
+         $begin = new Time($bulan, locale: 'id');
+         $startDate = $begin->format('Y-m-01');
+         $endDate = $begin->format('Y-m-t');
+         $labelPeriode = "Bulan: " . $begin->toLocalizedString('MMMM Y');
+      }
+
+      $begin = new Time($startDate, locale: 'id');
+      $end = (new DateTime($endDate))->modify('+1 day');
       $interval = DateInterval::createFromDateString('1 day');
-      // buat array dari semua hari di bulan
       $period = new DatePeriod($begin, $interval, $end);
+
+      // Fetch all attendance for teachers in the date range (OPTIMIZED SINGLE QUERY)
+      $allPresensi = $this->presensiGuruModel->db->table('tb_presensi_guru')
+         ->select('tb_presensi_guru.*, tb_kehadiran.kehadiran')
+         ->join('tb_kehadiran', 'tb_presensi_guru.id_kehadiran = tb_kehadiran.id_kehadiran', 'left')
+         ->where('tb_presensi_guru.tanggal >=', $startDate)
+         ->where('tb_presensi_guru.tanggal <=', $endDate)
+         ->get()
+         ->getResultArray();
+
+      // Index attendance by teacher ID and date
+      $presensiIndexed = [];
+      foreach ($allPresensi as $p) {
+         $presensiIndexed[$p['id_guru']][$p['tanggal']] = $p;
+      }
 
       $arrayTanggal = [];
       $dataAbsen = [];
 
       foreach ($period as $value) {
+         $dateStr = $value->format('Y-m-d');
          // kecualikan hari sabtu dan minggu
          if (!($value->format('D') == 'Sat' || $value->format('D') == 'Sun')) {
-            $lewat = Time::parse($value->format('Y-m-d'))->isAfter(Time::today());
+            $lewat = Time::parse($dateStr)->isAfter(Time::today());
 
-            $absenByTanggal = $this->presensiGuruModel
-               ->getPresensiByTanggal($value->format('Y-m-d'));
+            $absenByTanggal = [];
+            foreach ($guru as $g) {
+               $idGuru = $g['id_guru'];
+               if (isset($presensiIndexed[$idGuru][$dateStr])) {
+                  $p = $presensiIndexed[$idGuru][$dateStr];
+                  $absenByTanggal[] = [
+                     'id_presensi' => $p['id_presensi'],
+                     'id_guru' => $p['id_guru'],
+                     'tanggal' => $p['tanggal'],
+                     'jam_masuk' => $p['jam_masuk'],
+                     'jam_keluar' => $p['jam_keluar'],
+                     'id_kehadiran' => $p['id_kehadiran'],
+                     'keterangan' => $p['keterangan'],
+                     'kehadiran' => $p['kehadiran']
+                  ];
+               } else {
+                  $absenByTanggal[] = [
+                     'id_presensi' => null,
+                     'id_guru' => $idGuru,
+                     'tanggal' => $dateStr,
+                     'jam_masuk' => null,
+                     'jam_keluar' => null,
+                     'id_kehadiran' => null,
+                     'keterangan' => '',
+                     'kehadiran' => null
+                  ];
+               }
+            }
 
             $absenByTanggal['lewat'] = $lewat;
 
@@ -179,7 +349,6 @@ class GenerateLaporan extends BaseController
       }
 
       $laki = 0;
-
       foreach ($guru as $value) {
          if ($value['jenis_kelamin'] != 'Perempuan') {
             $laki++;
@@ -188,7 +357,7 @@ class GenerateLaporan extends BaseController
 
       $data = [
          'tanggal' => $arrayTanggal,
-         'bulan' => $begin->toLocalizedString('MMMM'),
+         'bulan' => $labelPeriode,
          'listAbsen' => $dataAbsen,
          'listGuru' => $guru,
          'jumlahGuru' => [
@@ -202,7 +371,7 @@ class GenerateLaporan extends BaseController
          $this->response->setHeader('Content-type', 'application/vnd.ms-word');
          $this->response->setHeader(
             'Content-Disposition',
-            'attachment;Filename=laporan_absen_guru_' . $begin->toLocalizedString('MMMM-Y') . '.doc'
+            'attachment;Filename=laporan_absen_guru_' . str_replace(' ', '_', $labelPeriode) . '.doc'
          );
 
          return view('admin/generate-laporan/laporan-guru', $data);

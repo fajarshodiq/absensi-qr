@@ -25,125 +25,262 @@
                      </div>
                   </div>
                </div>
-               <div class="card-body">
-                  <div class="row">
-                     <div class="col-md-6">
-                        <div class="card h-100">
-                           <form action="<?= base_url('admin/laporan/siswa'); ?>" method="post"
-                              class="card-body d-flex flex-column">
-                              <h4 class="text-primary"><b>Laporan Absen Siswa</b></h4>
-                              <div class="row align-items-center">
-                                 <div class="col-auto">
-                                    <p class="d-inline"><b>Bulan :</b></p>
-                                 </div>
-                                 <div class="col-5">
-                                    <input type="month" name="tanggalSiswa" id="tanggalSiswa" class="form-control"
-                                       value="<?= date('Y-m'); ?>">
-                                 </div>
-                              </div>
-                              <select name="kelas" class="custom-select mt-3">
-                                 <option value="">--Pilih kelas--</option>
-                                 <?php foreach ($kelas as $key => $value): ?>
-                                    <?php
-                                    $idKelas = $value['id_kelas'];
-                                    $namaKelas = $value['kelas'];
-                                    $totalSiswa = count($siswaPerKelas[$key]);
-                                    ?>
-                                    <option value="<?= $idKelas; ?>">
-                                       <?= "$namaKelas - {$totalSiswa} siswa"; ?>
-                                    </option>
-                                 <?php endforeach; ?>
-                              </select>
-                              <div class="errMsg"></div>
-                              <div class="mt-auto d-flex flex-column">
-                                 <button type="submit" name="type" value="pdf" class="btn btn-danger pl-3">
-                                    <div class="row align-items-center">
-                                       <div class="col-auto">
-                                          <i class="material-icons" style="font-size: 32px;">print</i>
-                                       </div>
-                                       <div class="col">
-                                          <div class="text-start">
-                                             <h4 class="d-inline"><b>Generate pdf</b></h4>
-                                          </div>
-                                       </div>
-                                    </div>
-                                 </button>
-                                 <button type="submit" name="type" value="doc" class="btn btn-info pl-3">
-                                    <div class="row align-items-center">
-                                       <div class="col-auto">
-                                          <i class="material-icons" style="font-size: 32px;">description</i>
-                                       </div>
-                                       <div class="col">
-                                          <div class="text-start">
-                                             <h4 class="d-inline"><b>Generate doc</b></h4>
-                                          </div>
-                                       </div>
-                                    </div>
-                                 </button>
-                                 <!-- <button type="submit" name="type" value="xls" class="btn btn-success pl-3 mt-auto">
-                                 <div class="row align-items-center">
-                                    <div class="col-auto">
-                                       <i class="material-icons" style="font-size: 32px;">table_view</i>
-                                    </div>
-                                    <div class="col">
-                                       <div class="text-start">
-                                          <h4 class="d-inline"><b>Generate xls</b></h4>
-                                       </div>
-                                    </div>
-                                 </div>
-                              </button> -->
-                              </div>
+                <div class="card-body">
+                   <div class="row">
+                      <!-- SECTION LAPORAN SISWA -->
+                      <div class="col-md-6 mb-4">
+                         <div class="card h-100 shadow-sm border" style="border-radius: 8px;">
+                            <form action="<?= base_url('admin/laporan/siswa'); ?>" method="post" class="card-body d-flex flex-column" style="padding: 1.5rem;">
+                               <h4 class="text-primary mb-3"><b><i class="material-icons align-middle mr-1">face</i> Laporan Absen Siswa</b></h4>
+                               
+                               <input type="hidden" name="filter_type" id="filter_type_siswa" value="bulanan">
+                               
+                               <!-- Tab Selectors -->
+                               <ul class="nav nav-pills nav-pills-info justify-content-start mb-3" role="tablist" style="background: #f8f9fa; padding: 6px; border-radius: 6px;">
+                                  <li class="nav-item w-33 text-center">
+                                     <a class="nav-link active py-2" data-toggle="pill" href="#tab-siswa-bulanan" role="tab" onclick="document.getElementById('filter_type_siswa').value = 'bulanan'" style="font-weight: 500; font-size: 13px;">Bulanan</a>
+                                  </li>
+                                  <li class="nav-item w-33 text-center">
+                                     <a class="nav-link py-2" data-toggle="pill" href="#tab-siswa-mingguan" role="tab" onclick="document.getElementById('filter_type_siswa').value = 'mingguan'" style="font-weight: 500; font-size: 13px;">Mingguan</a>
+                                  </li>
+                                  <li class="nav-item w-33 text-center">
+                                     <a class="nav-link py-2" data-toggle="pill" href="#tab-siswa-semester" role="tab" onclick="document.getElementById('filter_type_siswa').value = 'semester'" style="font-weight: 500; font-size: 13px;">Semester</a>
+                                  </li>
+                               </ul>
+                               
+                               <!-- Tab Content -->
+                               <div class="tab-content my-3">
+                                  <!-- Bulanan Tab -->
+                                  <div class="tab-pane active" id="tab-siswa-bulanan" role="tabpanel">
+                                     <div class="row">
+                                        <div class="col-6">
+                                           <label class="text-secondary font-weight-bold" style="font-size: 12px;">Pilih Bulan</label>
+                                           <select name="bulanSiswa" class="custom-select form-control" style="font-size: 14px;">
+                                              <?php 
+                                              $indoMonths = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                                              $currentMonth = (int)date('m');
+                                              foreach ($indoMonths as $idx => $mName): 
+                                                 $val = sprintf("%02d", $idx + 1);
+                                              ?>
+                                                 <option value="<?= $val; ?>" <?= $val == $currentMonth ? 'selected' : ''; ?>><?= $mName; ?></option>
+                                              <?php endforeach; ?>
+                                           </select>
+                                        </div>
+                                        <div class="col-6">
+                                           <label class="text-secondary font-weight-bold" style="font-size: 12px;">Pilih Tahun</label>
+                                           <select name="tahunSiswa" class="custom-select form-control" style="font-size: 14px;">
+                                              <?php 
+                                              $currentYear = (int)date('Y');
+                                              for($y = $currentYear - 4; $y <= $currentYear + 1; $y++): 
+                                              ?>
+                                                 <option value="<?= $y; ?>" <?= $y == $currentYear ? 'selected' : ''; ?>><?= $y; ?></option>
+                                              <?php endfor; ?>
+                                           </select>
+                                        </div>
+                                     </div>
+                                  </div>
+                                  
+                                  <!-- Mingguan Tab -->
+                                  <div class="tab-pane" id="tab-siswa-mingguan" role="tabpanel">
+                                     <div class="row">
+                                        <div class="col-6">
+                                           <label class="text-secondary font-weight-bold" style="font-size: 12px;">Tanggal Mulai</label>
+                                           <input type="date" name="start_date" class="form-control" value="<?= date('Y-m-d', strtotime('-7 days')); ?>" style="font-size: 14px;">
+                                        </div>
+                                        <div class="col-6">
+                                           <label class="text-secondary font-weight-bold" style="font-size: 12px;">Tanggal Selesai</label>
+                                           <input type="date" name="end_date" class="form-control" value="<?= date('Y-m-d'); ?>" style="font-size: 14px;">
+                                        </div>
+                                     </div>
+                                  </div>
+                                  
+                                  <!-- Semester Tab -->
+                                  <div class="tab-pane" id="tab-siswa-semester" role="tabpanel">
+                                     <div class="row">
+                                        <div class="col-6">
+                                           <label class="text-secondary font-weight-bold" style="font-size: 12px;">Semester</label>
+                                           <select name="semester" class="custom-select form-control" style="font-size: 14px;">
+                                              <option value="ganjil">Ganjil (Juli - Des)</option>
+                                              <option value="genap">Genap (Jan - Juni)</option>
+                                           </select>
+                                        </div>
+                                        <div class="col-6">
+                                           <label class="text-secondary font-weight-bold" style="font-size: 12px;">Tahun Ajaran</label>
+                                           <select name="tahun_ajaran" class="custom-select form-control" style="font-size: 14px;">
+                                              <?php 
+                                              for($y = $currentYear - 3; $y <= $currentYear + 1; $y++): 
+                                                 $ta = "$y/" . ($y + 1);
+                                              ?>
+                                                 <option value="<?= $ta; ?>" <?= $y == ($currentYear - 1) ? 'selected' : ''; ?>><?= $ta; ?></option>
+                                              <?php endfor; ?>
+                                           </select>
+                                        </div>
+                                     </div>
+                                  </div>
+                                </div>
 
-                           </form>
-                        </div>
-                     </div>
-                     <div class="col-md-6">
-                        <div class="card h-100">
-                           <form action="<?= base_url('admin/laporan/guru'); ?>" method="post"
-                              class="card-body d-flex flex-column">
-                              <h4 class="text-success"><b>Laporan Absen Guru</b></h4>
-                              <p>Total jumlah guru : <b><?= count($guru); ?></b></p>
-                              <div class="row align-items-center">
-                                 <div class="col-auto">
-                                    <p class="d-inline"><b>Bulan :</b></p>
-                                 </div>
-                                 <div class="col-5">
-                                    <input type="month" name="tanggalGuru" id="tanggalGuru" class="form-control"
-                                       value="<?= date('Y-m'); ?>">
-                                 </div>
-                              </div>
-                              <div class="mt-auto d-flex flex-column">
-                                 <button type="submit" name="type" value="pdf" class="btn btn-danger pl-3">
-                                    <div class="row align-items-center">
-                                       <div class="col-auto">
-                                          <i class="material-icons" style="font-size: 32px;">print</i>
-                                       </div>
-                                       <div class="col">
-                                          <div class="text-start">
-                                             <h4 class="d-inline"><b>Generate pdf</b></h4>
-                                          </div>
-                                       </div>
-                                    </div>
-                                 </button>
-                                 <button type="submit" name="type" value="doc" class="btn btn-info pl-3">
-                                    <div class="row align-items-center">
-                                       <div class="col-auto">
-                                          <i class="material-icons" style="font-size: 32px;">description</i>
-                                       </div>
-                                       <div class="col">
-                                          <div class="text-start">
-                                             <h4 class="d-inline"><b>Generate doc</b></h4>
-                                          </div>
-                                       </div>
-                                    </div>
-                                 </button>
-                              </div>
-                           </form>
-                        </div>
-                     </div>
-                  </div>
-                  <br><br>
-               </div>
+                               <div class="form-group my-3">
+                                  <label class="text-secondary font-weight-bold" style="font-size: 12px; margin-bottom: 5px;">Pilih Kelas</label>
+                                  <select name="kelas" class="custom-select form-control" required style="font-size: 14px;">
+                                     <option value="">-- Pilih Kelas --</option>
+                                     <?php foreach ($kelas as $key => $value): ?>
+                                        <?php
+                                        $idKelas = $value['id_kelas'];
+                                        $namaKelas = $value['kelas'];
+                                        $totalSiswa = count($siswaPerKelas[$key]);
+                                        ?>
+                                        <option value="<?= $idKelas; ?>">
+                                           <?= "$namaKelas - {$totalSiswa} siswa"; ?>
+                                        </option>
+                                     <?php endforeach; ?>
+                                  </select>
+                               </div>
+                               
+                               <div class="errMsg"></div>
+                               
+                               <div class="mt-auto pt-3 d-flex flex-column">
+                                  <button type="submit" name="type" value="pdf" class="btn btn-danger btn-block pl-3 mb-2" style="border-radius: 6px; box-shadow: none;">
+                                     <div class="row align-items-center">
+                                        <div class="col-auto">
+                                           <i class="material-icons" style="font-size: 24px;">picture_as_pdf</i>
+                                        </div>
+                                        <div class="col text-left">
+                                           <span style="font-size: 14px; font-weight: bold; text-transform: uppercase;">Unduh PDF / Print</span>
+                                        </div>
+                                     </div>
+                                  </button>
+                                  <button type="submit" name="type" value="doc" class="btn btn-info btn-block pl-3 m-0" style="border-radius: 6px; box-shadow: none;">
+                                     <div class="row align-items-center">
+                                        <div class="col-auto">
+                                           <i class="material-icons" style="font-size: 24px;">description</i>
+                                        </div>
+                                        <div class="col text-left">
+                                           <span style="font-size: 14px; font-weight: bold; text-transform: uppercase;">Unduh Word (.doc)</span>
+                                        </div>
+                                     </div>
+                                  </button>
+                               </div>
+                            </form>
+                         </div>
+                      </div>
+                      
+                      <!-- SECTION LAPORAN GURU -->
+                      <div class="col-md-6 mb-4">
+                         <div class="card h-100 shadow-sm border" style="border-radius: 8px;">
+                            <form action="<?= base_url('admin/laporan/guru'); ?>" method="post" class="card-body d-flex flex-column" style="padding: 1.5rem;">
+                               <h4 class="text-success mb-3"><b><i class="material-icons align-middle mr-1">school</i> Laporan Absen Guru</b></h4>
+                               <p class="text-muted" style="font-size: 13px;">Total jumlah guru: <strong class="text-dark"><?= count($guru); ?> orang</strong></p>
+                               
+                               <input type="hidden" name="filter_type" id="filter_type_guru" value="bulanan">
+                               
+                               <!-- Tab Selectors -->
+                               <ul class="nav nav-pills nav-pills-success justify-content-start mb-3" role="tablist" style="background: #f8f9fa; padding: 6px; border-radius: 6px;">
+                                  <li class="nav-item w-33 text-center">
+                                     <a class="nav-link active py-2" data-toggle="pill" href="#tab-guru-bulanan" role="tab" onclick="document.getElementById('filter_type_guru').value = 'bulanan'" style="font-weight: 500; font-size: 13px;">Bulanan</a>
+                                  </li>
+                                  <li class="nav-item w-33 text-center">
+                                     <a class="nav-link py-2" data-toggle="pill" href="#tab-guru-mingguan" role="tab" onclick="document.getElementById('filter_type_guru').value = 'mingguan'" style="font-weight: 500; font-size: 13px;">Mingguan</a>
+                                  </li>
+                                  <li class="nav-item w-33 text-center">
+                                     <a class="nav-link py-2" data-toggle="pill" href="#tab-guru-semester" role="tab" onclick="document.getElementById('filter_type_guru').value = 'semester'" style="font-weight: 500; font-size: 13px;">Semester</a>
+                                  </li>
+                                </ul>
+                                
+                               <!-- Tab Content -->
+                               <div class="tab-content my-3">
+                                  <!-- Bulanan Tab -->
+                                  <div class="tab-pane active" id="tab-guru-bulanan" role="tabpanel">
+                                     <div class="row">
+                                        <div class="col-6">
+                                           <label class="text-secondary font-weight-bold" style="font-size: 12px;">Pilih Bulan</label>
+                                           <select name="bulanGuru" class="custom-select form-control" style="font-size: 14px;">
+                                              <?php 
+                                              foreach ($indoMonths as $idx => $mName): 
+                                                 $val = sprintf("%02d", $idx + 1);
+                                              ?>
+                                                 <option value="<?= $val; ?>" <?= $val == $currentMonth ? 'selected' : ''; ?>><?= $mName; ?></option>
+                                              <?php endforeach; ?>
+                                           </select>
+                                        </div>
+                                        <div class="col-6">
+                                           <label class="text-secondary font-weight-bold" style="font-size: 12px;">Pilih Tahun</label>
+                                           <select name="tahunGuru" class="custom-select form-control" style="font-size: 14px;">
+                                              <?php 
+                                              for($y = $currentYear - 4; $y <= $currentYear + 1; $y++): 
+                                              ?>
+                                                 <option value="<?= $y; ?>" <?= $y == $currentYear ? 'selected' : ''; ?>><?= $y; ?></option>
+                                              <?php endfor; ?>
+                                           </select>
+                                        </div>
+                                     </div>
+                                  </div>
+                                  
+                                  <!-- Mingguan Tab -->
+                                  <div class="tab-pane" id="tab-guru-mingguan" role="tabpanel">
+                                     <div class="row">
+                                        <div class="col-6">
+                                           <label class="text-secondary font-weight-bold" style="font-size: 12px;">Tanggal Mulai</label>
+                                           <input type="date" name="start_date" class="form-control" value="<?= date('Y-m-d', strtotime('-7 days')); ?>" style="font-size: 14px;">
+                                        </div>
+                                        <div class="col-6">
+                                           <label class="text-secondary font-weight-bold" style="font-size: 12px;">Tanggal Selesai</label>
+                                           <input type="date" name="end_date" class="form-control" value="<?= date('Y-m-d'); ?>" style="font-size: 14px;">
+                                        </div>
+                                     </div>
+                                  </div>
+                                  
+                                  <!-- Semester Tab -->
+                                  <div class="tab-pane" id="tab-guru-semester" role="tabpanel">
+                                     <div class="row">
+                                        <div class="col-6">
+                                           <label class="text-secondary font-weight-bold" style="font-size: 12px;">Semester</label>
+                                           <select name="semester" class="custom-select form-control" style="font-size: 14px;">
+                                              <option value="ganjil">Ganjil (Juli - Des)</option>
+                                              <option value="genap">Genap (Jan - Juni)</option>
+                                           </select>
+                                        </div>
+                                        <div class="col-6">
+                                           <label class="text-secondary font-weight-bold" style="font-size: 12px;">Tahun Ajaran</label>
+                                           <select name="tahun_ajaran" class="custom-select form-control" style="font-size: 14px;">
+                                              <?php 
+                                              for($y = $currentYear - 3; $y <= $currentYear + 1; $y++): 
+                                                 $ta = "$y/" . ($y + 1);
+                                              ?>
+                                                 <option value="<?= $ta; ?>" <?= $y == ($currentYear - 1) ? 'selected' : ''; ?>><?= $ta; ?></option>
+                                              <?php endfor; ?>
+                                           </select>
+                                        </div>
+                                     </div>
+                                  </div>
+                               </div>
+                               
+                               <div class="mt-auto pt-3 d-flex flex-column">
+                                  <button type="submit" name="type" value="pdf" class="btn btn-danger btn-block pl-3 mb-2" style="border-radius: 6px; box-shadow: none;">
+                                     <div class="row align-items-center">
+                                        <div class="col-auto">
+                                           <i class="material-icons" style="font-size: 24px;">picture_as_pdf</i>
+                                        </div>
+                                        <div class="col text-left">
+                                           <span style="font-size: 14px; font-weight: bold; text-transform: uppercase;">Unduh PDF / Print</span>
+                                        </div>
+                                     </div>
+                                  </button>
+                                  <button type="submit" name="type" value="doc" class="btn btn-info btn-block pl-3 m-0" style="border-radius: 6px; box-shadow: none;">
+                                     <div class="row align-items-center">
+                                        <div class="col-auto">
+                                           <i class="material-icons" style="font-size: 24px;">description</i>
+                                        </div>
+                                        <div class="col text-left">
+                                           <span style="font-size: 14px; font-weight: bold; text-transform: uppercase;">Unduh Word (.doc)</span>
+                                        </div>
+                                     </div>
+                                  </button>
+                               </div>
+                            </form>
+                         </div>
+                      </div>
+                   </div>
+                </div>
             </div>
          </div>
       </div>

@@ -1,131 +1,193 @@
 <?= $this->extend('templates/laporan') ?>
 
 <?= $this->section('content') ?>
-<table>
+
+<!-- Header Laporan -->
+<table class="report-header-table">
    <tr>
-      <td><img src="<?= getLogo(); ?>" width="100px" height="100px"></img></td>
-      <td width="100%">
-         <h2 align="center">DAFTAR HADIR GURU</h2>
-         <h4 align="center"><?= $generalSettings->school_name; ?></h4>
-         <h4 align="center">TAHUN PELAJARAN <?= $generalSettings->school_year; ?></h4>
+      <td width="120px" align="center">
+         <?php if (getLogo()): ?>
+            <img src="<?= getLogo(); ?>" width="80px" height="80px" style="object-fit: contain;"></img>
+         <?php endif; ?>
       </td>
-      <td>
-         <div style="width:100px"></div>
+      <td align="center" style="text-align: center;">
+         <h1 class="school-title"><?= esc($generalSettings->school_name); ?></h1>
+         <h2 class="report-title">DAFTAR HADIR GURU</h2>
+         <p class="school-year">TAHUN PELAJARAN <?= esc($generalSettings->school_year); ?></p>
       </td>
+      <td width="120px"></td>
    </tr>
 </table>
-<span>Bulan : <?= $bulan; ?></span>
-<table align="center" border="1">
-   <thead>
-      <td></td>
-      <td></td>
-      <th colspan="<?= count($tanggal); ?>">Hari/Tanggal</th>
-   </thead>
-   <thead>
-      <td></td>
-      <td></td>
-      <?php foreach ($tanggal as $value) : ?>
-         <th align="center"><?= $value->toLocalizedString('E'); ?></th>
-      <?php endforeach; ?>
-      <td colspan="4" align="center">Total</td>
-   </thead>
+
+<!-- Metadata Laporan -->
+<table class="meta-table">
    <tr>
-      <th align="center">No</th>
-      <th width="1000px">Nama</th>
-      <?php foreach ($tanggal as $value) : ?>
-         <th align="center"><?= $value->format('d'); ?></th>
-      <?php endforeach; ?>
-      <th align="center" style="background-color:lightgreen;">H</th>
-      <th align="center" style="background-color:yellow;">S</th>
-      <th align="center" style="background-color:yellow;">I</th>
-      <th align="center" style="background-color:red;">A</th>
+      <td width="50%"><strong>Periode:</strong> <?= esc($bulan); ?></td>
+      <td width="50%" align="right" style="text-align: right;"><strong>Grup:</strong> Guru / Staf Pengajar</td>
    </tr>
+</table>
 
-   <?php $i = 0; ?>
-
-   <?php foreach ($listGuru as $guru) : ?>
-      <?php
-      $jumlahHadir = count(array_filter($listAbsen, function ($a) use ($i) {
-         if ($a['lewat'] || is_null($a[$i]['id_kehadiran'])) return false;
-         return $a[$i]['id_kehadiran'] == 1;
-      }));
-      $jumlahSakit = count(array_filter($listAbsen, function ($a) use ($i) {
-         if ($a['lewat'] || is_null($a[$i]['id_kehadiran'])) return false;
-         return $a[$i]['id_kehadiran'] == 2;
-      }));
-      $jumlahIzin = count(array_filter($listAbsen, function ($a) use ($i) {
-         if ($a['lewat'] || is_null($a[$i]['id_kehadiran'])) return false;
-         return $a[$i]['id_kehadiran'] == 3;
-      }));
-      $jumlahTidakHadir = count(array_filter($listAbsen, function ($a) use ($i) {
-         if ($a['lewat']) return false;
-         if (is_null($a[$i]['id_kehadiran']) || $a[$i]['id_kehadiran'] == 4) return true;
-         return false;
-      }));
-      ?>
+<!-- Main Attendance Table -->
+<table class="report-table">
+   <thead>
       <tr>
-         <td align="center"><?= $i + 1; ?></td>
-         <td><?= $guru['nama_guru']; ?></td>
-         <?php foreach ($listAbsen as $absen) : ?>
-            <?= kehadiran($absen[$i]['id_kehadiran'] ?? ($absen['lewat'] ? 5 : 4)); ?>
-         <?php endforeach; ?>
-         <td align="center">
-            <?= $jumlahHadir != 0 ? $jumlahHadir : '-'; ?>
-         </td>
-         <td align="center">
-            <?= $jumlahSakit != 0 ? $jumlahSakit : '-'; ?>
-         </td>
-         <td align="center">
-            <?= $jumlahIzin != 0 ? $jumlahIzin : '-'; ?>
-         </td>
-         <td align="center">
-            <?= $jumlahTidakHadir != 0 ? $jumlahTidakHadir : '-'; ?>
-         </td>
+         <th rowspan="3" width="40px">No</th>
+         <th rowspan="3" style="text-align: left; padding-left: 12px;">Nama Guru</th>
+         <th colspan="<?= count($tanggal); ?>">Hari / Tanggal</th>
+         <th colspan="4">Total Absen</th>
+         <th rowspan="3" width="100px">Persentase</th>
       </tr>
-   <?php
-      $i++;
-   endforeach; ?>
+      <tr>
+         <?php foreach ($tanggal as $value) : ?>
+            <th style="font-size: 9px; font-weight: bold;"><?= $value->toLocalizedString('E'); ?></th>
+         <?php endforeach; ?>
+         <th colspan="4" style="font-size: 9px; font-weight: bold;">Status</th>
+      </tr>
+      <tr>
+         <?php foreach ($tanggal as $value) : ?>
+            <th><?= $value->format('d'); ?></th>
+         <?php endforeach; ?>
+         <th class="total-h" style="width: 25px;">H</th>
+         <th class="total-s" style="width: 25px;">S</th>
+         <th class="total-i" style="width: 25px;">I</th>
+         <th class="total-a" style="width: 25px;">A</th>
+      </tr>
+   </thead>
+   <tbody>
+      <?php 
+      $i = 0;
+      $totalHadirAll = 0;
+      $totalSakitAll = 0;
+      $totalIzinAll = 0;
+      $totalAlpaAll = 0;
 
+      // Count elapsed active days
+      $activeDays = count(array_filter($listAbsen, function($a) {
+         return !$a['lewat'];
+      }));
+
+      foreach ($listGuru as $guru) : 
+         $jumlahHadir = count(array_filter($listAbsen, function ($a) use ($i) {
+            if ($a['lewat'] || is_null($a[$i]['id_kehadiran'])) return false;
+            return $a[$i]['id_kehadiran'] == 1;
+         }));
+         $jumlahSakit = count(array_filter($listAbsen, function ($a) use ($i) {
+            if ($a['lewat'] || is_null($a[$i]['id_kehadiran'])) return false;
+            return $a[$i]['id_kehadiran'] == 2;
+         }));
+         $jumlahIzin = count(array_filter($listAbsen, function ($a) use ($i) {
+            if ($a['lewat'] || is_null($a[$i]['id_kehadiran'])) return false;
+            return $a[$i]['id_kehadiran'] == 3;
+         }));
+         $jumlahTidakHadir = count(array_filter($listAbsen, function ($a) use ($i) {
+            if ($a['lewat']) return false;
+            if (is_null($a[$i]['id_kehadiran']) || $a[$i]['id_kehadiran'] == 4) return true;
+            return false;
+         }));
+
+         // Accumulate counters
+         $totalHadirAll += $jumlahHadir;
+         $totalSakitAll += $jumlahSakit;
+         $totalIzinAll += $jumlahIzin;
+         $totalAlpaAll += $jumlahTidakHadir;
+
+         // Calculate individual percentages
+         $persenHadir = $activeDays > 0 ? round(($jumlahHadir / $activeDays) * 100) : 0;
+         $persenSakit = $activeDays > 0 ? round(($jumlahSakit / $activeDays) * 100) : 0;
+         $persenIzin = $activeDays > 0 ? round(($jumlahIzin / $activeDays) * 100) : 0;
+         $persenAlpa = $activeDays > 0 ? round(($jumlahTidakHadir / $activeDays) * 100) : 0;
+      ?>
+         <tr class="student-row">
+            <td><?= $i + 1; ?></td>
+            <td class="student-name-td"><?= esc($guru['nama_guru']); ?></td>
+            <?php foreach ($listAbsen as $absen) : ?>
+               <?= kehadiranCell($absen[$i]['id_kehadiran'] ?? ($absen['lewat'] ? 5 : 4)); ?>
+            <?php endforeach; ?>
+            <td class="total-col total-h"><?= $jumlahHadir != 0 ? $jumlahHadir : '-'; ?></td>
+            <td class="total-col total-s"><?= $jumlahSakit != 0 ? $jumlahSakit : '-'; ?></td>
+            <td class="total-col total-i"><?= $jumlahIzin != 0 ? $jumlahIzin : '-'; ?></td>
+            <td class="total-col total-a"><?= $jumlahTidakHadir != 0 ? $jumlahTidakHadir : '-'; ?></td>
+            <td style="text-align: left; font-size: 10px; line-height: 1.3; font-weight: bold; white-space: nowrap;">
+               <span style="color: var(--color-hadir);">H: <?= $persenHadir ?>%</span><br>
+               <span style="color: var(--color-sakit);">S: <?= $persenSakit ?>%</span><br>
+               <span style="color: var(--color-izin);">I: <?= $persenIzin ?>%</span><br>
+               <span style="color: var(--color-alpa);">A: <?= $persenAlpa ?>%</span>
+            </td>
+         </tr>
+      <?php
+         $i++;
+      endforeach; ?>
+   </tbody>
 </table>
-<br></br>
-<table>
-   <tr>
-      <td>Jumlah guru</td>
-      <td>: <?= count($listGuru); ?></td>
-   </tr>
-   <tr>
-      <td>Laki-laki</td>
-      <td>: <?= $jumlahGuru['laki']; ?></td>
-   </tr>
-   <tr>
-      <td>Perempuan</td>
-      <td>: <?= $jumlahGuru['perempuan']; ?></td>
+
+<!-- Summary and Statistics Section -->
+<table style="width: 100%; border: none; margin-top: 25px;">
+   <tr style="border: none;">
+      <td width="50%" style="vertical-align: top; border: none; padding: 0;">
+         <div class="summary-card">
+            <h5><b>Detail Data Guru</b></h5>
+            <div class="summary-row">
+               <span>Jumlah Guru</span>
+               <span class="summary-value">: <?= count($listGuru); ?> orang</span>
+            </div>
+            <div class="summary-row">
+               <span>Laki-laki</span>
+               <span class="summary-value">: <?= $jumlahGuru['laki']; ?> orang</span>
+            </div>
+            <div class="summary-row">
+               <span>Perempuan</span>
+               <span class="summary-value">: <?= $jumlahGuru['perempuan']; ?> orang</span>
+            </div>
+         </div>
+      </td>
+      <td width="50%" style="vertical-align: top; border: none; padding: 0;" align="right">
+         <?php
+         $countGuru = count($listGuru);
+         $totalPossibleDays = $countGuru * $activeDays;
+         $overallHadir = $totalPossibleDays > 0 ? round(($totalHadirAll / $totalPossibleDays) * 100) : 0;
+         $overallSakit = $totalPossibleDays > 0 ? round(($totalSakitAll / $totalPossibleDays) * 100) : 0;
+         $overallIzin = $totalPossibleDays > 0 ? round(($totalIzinAll / $totalPossibleDays) * 100) : 0;
+         $overallAlpa = $totalPossibleDays > 0 ? round(($totalAlpaAll / $totalPossibleDays) * 100) : 0;
+         ?>
+         <div class="summary-card" style="text-align: left;">
+            <h5><b>Rata-rata Kehadiran Guru (<?= $activeDays; ?> Hari Aktif)</b></h5>
+            <div class="summary-row">
+               <span style="color: var(--color-hadir); font-weight: bold;">Hadir (H)</span>
+               <span class="summary-value" style="color: var(--color-hadir);"><?= $overallHadir; ?>%</span>
+            </div>
+            <div class="summary-row">
+               <span style="color: var(--color-sakit); font-weight: bold;">Sakit (S)</span>
+               <span class="summary-value" style="color: var(--color-sakit);"><?= $overallSakit; ?>%</span>
+            </div>
+            <div class="summary-row">
+               <span style="color: var(--color-izin); font-weight: bold;">Izin (I)</span>
+               <span class="summary-value" style="color: var(--color-izin);"><?= $overallIzin; ?>%</span>
+            </div>
+            <div class="summary-row">
+               <span style="color: var(--color-alpa); font-weight: bold;">Alpa (A)</span>
+               <span class="summary-value" style="color: var(--color-alpa);"><?= $overallAlpa; ?>%</span>
+            </div>
+         </div>
+      </td>
    </tr>
 </table>
+
 <?php
-function kehadiran($kehadiran)
+function kehadiranCell($kehadiran)
 {
-   $text = '';
    switch ($kehadiran) {
       case 1:
-         $text = "<td align='center' style='background-color:lightgreen;'>H</td>";
-         break;
+         return "<td class='status-cell status-h'>H</td>";
       case 2:
-         $text = "<td align='center' style='background-color:yellow;'>S</td>";
-         break;
+         return "<td class='status-cell status-s'>S</td>";
       case 3:
-         $text = "<td align='center' style='background-color:yellow;'>I</td>";
-         break;
+         return "<td class='status-cell status-i'>I</td>";
       case 4:
-         $text = "<td align='center' style='background-color:red;'>A</td>";
-         break;
+         return "<td class='status-cell status-a'>A</td>";
       case 5:
       default:
-         $text = "<td></td>";
-         break;
+         return "<td class='status-cell status-empty'></td>";
    }
-
-   return $text;
 }
 ?>
 <?= $this->endSection() ?>
